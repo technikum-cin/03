@@ -1,0 +1,33 @@
+# usage: C:\...\scripts> C:\java\wildfly-16.0.0.Final\bin\jboss-cli.bat --file=configure-wildfly-datasource.cli
+
+connect
+
+# add MySQL JDBC driver as module
+module add \
+	--name=com.mysql \
+	--resources=mysql-connector-java-8.0.16.jar \
+	--dependencies=javax.api,javax.transaction.api
+	
+# register MySQL JDBC driver
+/subsystem=datasources/jdbc-driver=mysql:add( \
+	driver-name=mysql, \
+	driver-module-name=com.mysql, \
+	driver-class-name=com.mysql.cj.jdbc.Driver, \
+	driver-xa-datasource-class-name=com.mysql.cj.jdbc.MysqlXADataSource \
+)
+
+# add data source
+data-source add \
+	--name=EmployeeDS \
+	--jndi-name=java:jboss/datasources/EmployeeDS \
+	--driver-name=mysql \
+	--connection-url=jdbc:mysql://localhost:3306/db_employee?serverTimezone=Europe/Vienna \
+	--user-name=root \
+#	--password= \
+	--min-pool-size=5 \
+	--max-pool-size=5 \
+	--pool-prefill=true
+	
+:reload()
+
+exit
